@@ -1,0 +1,58 @@
+{
+	"dest": "dev",
+	"framework": {
+		"name": "adapt_framework",
+		"repo": "cgkineo",
+		"branch": "master"
+	},
+	"questions": [
+		{
+			"type": "checkbox",
+			"name": "courses",
+			"message": "Please choose course(s) to install.\n",
+			"choices": []
+		},
+		{
+			"type": "checkbox",
+			"name": "menus",
+			"message": "Please choose menu(s) to install.\n",
+			"choices": []
+		},
+		{
+			"type": "checkbox",
+			"name": "themes",
+			"message": "Please choose theme(s) to install.\n",
+			"choices": []
+		},
+		{
+			"type": "checkbox",
+			"name": "components",
+			"message": "Please choose components(s) to install.\n",
+			"choices": []
+		},
+		{
+			"type": "checkbox",
+			"name": "extensions",
+			"message": "Please choose extensions(s) to install.\n",
+			"choices": []
+		},
+		{
+			"type": "checkbox",
+			"name": "uninstall",
+			"message": "Please choose plugin(s) to uninstall.\n",
+			"choices": []
+		}
+	],
+	"pluginDirs": {
+		"courses": "src/courses",
+		"menus": "src/menu",
+		"themes": "src/theme",
+		"components": "src/components",
+		"extensions": "src/extensions"
+	},
+	"registry": {
+		"name": "adapt-gulp-registry",
+		"repo": "cgkineo",
+		"branch": "master"
+	}
+}

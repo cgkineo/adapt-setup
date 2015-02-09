@@ -1,0 +1,16 @@
+#!/usr/bin/env node
+
+var program = require("commander");
+var gulp = require("../gulpfile.js");
+
+program
+	.option("create")
+	.option("install")
+	.option("list")
+	.option("uninstall")
+	.parse(process.argv);
+
+if (program.create) gulp.create();
+if (program.install) gulp.install();
+if (program.list) gulp.list();
+if (program.uninstall) gulp.uninstall();
