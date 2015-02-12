@@ -85,16 +85,18 @@ function getPlugins(pluginType) {
 		return true;
 	};
 	inquirer.prompt(questionsMap[pluginType], function(answer) {
-		if (answer[pluginType]) {
-			var answerCount = answer[pluginType].length;
-			var waiter = new Waiter(answerCount, deferred.resolve);
+		if (!answer[pluginType]) {
+			deferred.resolve();
+			return deferred.promise;
+		}
+		var answerCount = answer[pluginType].length;
+		var waiter = new Waiter(answerCount, deferred.resolve);
 
-			for (var i = 0; i < answerCount; i++) {
-				var choice = registry[pluginType + "Map"][answer[pluginType][i]];
-				var dest = config.dest + "/" + config.pluginDirs[pluginType] + "/" + choice.name;
+		for (var i = 0; i < answerCount; i++) {
+			var choice = registry[pluginType + "Map"][answer[pluginType][i]];
+			var dest = path.join(config.dest, config.pluginDirs[pluginType], choice.name);
 
-				install(choice, dest, waiter.done, waiter);
-			}
+			install(choice, dest, waiter.done, waiter);
 		}
 	});
 	return deferred.promise;
@@ -113,23 +115,24 @@ function disableChoices(pluginType) {
 
 function getDefaults(pluginType) {
 	var deferred = Q.defer();
-	var path = config.dest + "/" + config.pluginDirs[pluginType];
-	var plugins = fs.existsSync(path) ? fs.readdirSync(path) : "";
+	var pluginPath = path.join(config.dest, config.pluginDirs[pluginType]);
+	var plugins = fs.existsSync(pluginPath) ? fs.readdirSync(pluginPath) : "";
 
-	if (plugins) {
-		for (var i = 0, j = plugins.length; i < j; i++) {
-			var defaultJSON = path + "/" + plugins[i] + "/default.json";
+	if (!plugins) {
+		deferred.resolve();
+		return deferred.promise;
+	}
+	for (var i = 0, j = plugins.length; i < j; i++) {
+		var defaultJSON = path.join(pluginPath, plugins[i], "default.json");
 
-			if (fs.existsSync(defaultJSON)) {
-				var defaults = JSON.parse(fs.readFileSync(defaultJSON));
-				var types = _.keys(defaults);
+		if (!fs.existsSync(defaultJSON)) continue;
+		var defaults = JSON.parse(fs.readFileSync(defaultJSON));
+		var types = _.keys(defaults);
 
-				for (var k = 0, l = types.length; k < l; k++) {
-					var type = types[k];
+		for (var k = 0, l = types.length; k < l; k++) {
+			var type = types[k];
 
-					questionsMap[type].default = _.union(questionsMap[type].default, defaults[type]);
-				}
-			}
+			questionsMap[type].default = _.union(questionsMap[type].default, defaults[type]);
 		}
 	}
 	deferred.resolve();
@@ -142,16 +145,16 @@ function getInstalledPlugins() {
 	var installedPlugins = [];
 
 	for (var i = 0, j = pluginTypes.length; i < j; i++) {
-		var path = config.dest + "/" + pluginDirs[pluginTypes[i]];
-		var list = fs.existsSync(path) ? fs.readdirSync(path) : "";
+		var pluginPath = path.join(config.dest, pluginDirs[pluginTypes[i]]);
+		var plugins = fs.existsSync(pluginPath) ? fs.readdirSync(pluginPath) : "";
 
-		if (list) {
-			for (var k = 0, l = list.length; k < l; k++) {
-				installedPlugins.push({
-					name: list[k],
-					type: pluginTypes[i]
-				});
-			}
+		if (!plugins) continue;
+		for (var k = 0, l = plugins.length; k < l; k++) {
+			if (!fs.statSync(path.join(pluginPath, plugins[k])).isDirectory()) continue;
+			installedPlugins.push({
+				name: plugins[k],
+				type: pluginTypes[i]
+			});
 		}
 	}
 	return installedPlugins;
@@ -164,17 +167,16 @@ function uninstallPlugins() {
 
 	questionsMap.uninstall.choices = _.pluck(installedPlugins, "name");
 	inquirer.prompt(questionsMap.uninstall, function(answer) {
-		if (answer.uninstall) {
-			var answerCount = answer.uninstall.length;
-			var waiter = new Waiter(answerCount, deferred.resolve);
+		if (!answer.uninstall) return deferred.resolve();
+		var answerCount = answer.uninstall.length;
+		var waiter = new Waiter(answerCount, deferred.resolve);
 
-			for (var i = 0; i < answerCount; i++) {
-				var choice = answer.uninstall[i];
-				var pluginDir = config.pluginDirs[installedPluginsMap[choice].type];
-				var path = config.dest + "/" + pluginDir + "/" + choice;
+		for (var i = 0; i < answerCount; i++) {
+			var choice = answer.uninstall[i];
+			var pluginDir = config.pluginDirs[installedPluginsMap[choice].type];
+			var pluginPath = path.join(config.dest, pluginDir, choice);
 
-				uninstall(choice, path, waiter.done, waiter);
-			}
+			uninstall(choice, pluginPath, waiter.done, waiter);
 		}
 	});
 	return deferred.promise;
@@ -187,9 +189,9 @@ function npmInstall() {
 	cwd = process.cwd();
 	process.chdir(config.dest);
 	npm.load(function(err) {
-		if (err) deferred.reject(err);
+		if (err) return deferred.reject(err);
 		npm.commands.install(function() {
-			if (err) deferred.reject(err);
+			if (err) return deferred.reject(err);
 			process.chdir(cwd);
 			deferred.resolve();
 		});
