@@ -30,6 +30,6 @@
   "devDependencies": {
   },
   "bin": {
-    "cgkineo": "./bin/adapt-gulp-cli"
+    "adapt-gulp": "./bin/adapt-gulp-cli"
   }
 }
