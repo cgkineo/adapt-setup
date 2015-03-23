@@ -104,13 +104,18 @@ function getPlugins(pluginType) {
 
 function disableChoices(pluginType) {
 	var installedPlugins = _.pluck(_.where(getInstalledPlugins(), { type: pluginType }), "name");
-	var availablePlugins = _.pluck(questionsMap[pluginType].choices, "name");
-	var choicesToDisable = _.intersection(installedPlugins, availablePlugins);
-	var choicesMap = _.indexBy(questionsMap[pluginType].choices, "name");
+	// var availablePlugins = _.pluck(questionsMap[pluginType].choices, "name");
+	// var choicesToDisable = _.intersection(installedPlugins, availablePlugins);
+	// var choicesMap = _.indexBy(questionsMap[pluginType].choices, "name");
 
-	for (var i = 0, j = choicesToDisable.length; i < j; i++) {
-		choicesMap[choicesToDisable[i]].disabled = "already installed";
-	}
+	// for (var i = 0, j = choicesToDisable.length; i < j; i++) {
+	// 	choicesMap[choicesToDisable[i]].disabled = "already installed";
+	// }
+
+	// remove choices instead of disabling due to checkbox selection bug in inquirer 0.8.0
+	questionsMap[pluginType].choices = _.reject(questionsMap[pluginType].choices, function(i) {
+		return _.contains(installedPlugins, i.name);
+	});
 }
 
 function getDefaults(pluginType) {

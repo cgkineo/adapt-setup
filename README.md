@@ -4,7 +4,7 @@ Gulp-based command line interface for Adapt.
 
 ## Installation
 
-Note: requires [Node.js](http://nodejs.org), [Git](http://git-scm.com/) and [Gulp](https://github.com/gulpjs/gulp/blob/master/docs/getting-started.md) to be installed.
+Note: requires [Node.js](http://nodejs.org) and [Gulp](https://github.com/gulpjs/gulp/blob/master/docs/getting-started.md) to be installed.
 
 From the command line, run:
 ```

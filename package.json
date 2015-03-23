@@ -1,6 +1,6 @@
 {
   "name": "adapt-gulp-cli",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Gulp-based command line interface for Adapt.",
   "main": "",
   "scripts": {
@@ -27,8 +27,7 @@
     "q": "^1.1.2",
     "underscore": "^1.7.0"
   },
-  "devDependencies": {
-  },
+  "devDependencies": {},
   "bin": {
     "adapt-gulp": "./bin/adapt-gulp-cli"
   }
