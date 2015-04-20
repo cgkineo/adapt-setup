@@ -1,22 +1,26 @@
 var _ = require("underscore");
+var buffer = require("vinyl-buffer");
+var decompressUnzip = require("decompress-unzip");
 var del = require("del");
 var fs = require("fs");
 var gulp = require("gulp");
-var download = require("gulp-download");
+var gutil = require("gulp-util");
+var inquirer = require("inquirer");
 var npm = require("npm");
 var path = require("path");
-var inquirer = require("inquirer");
 var Q = require("q");
+var request = require("request");
+var source = require("vinyl-source-stream");
 var tap = require("gulp-tap");
-var unzip = require("gulp-unzip");
+var vinylAssign = require("vinyl-assign");
 var Waiter = require("./Waiter");
 
 var config = require("./config.json");
-var registry = {};
 var questionsMap = _.indexBy(config.questions, "name");
+var registry = {};
 
 gulp.task("create", function() {
-	getFramework()
+	return getFramework()
 		.then(getRegistry)
 		.then(function() { return getPlugins("courses"); })
 		.then(function() { return getDefaults("courses"); })
@@ -24,23 +28,25 @@ gulp.task("create", function() {
 		.then(function() { return getPlugins("themes"); })
 		.then(function() { return getPlugins("components"); })
 		.then(function() { return getPlugins("extensions"); })
-		.then(npmInstall)
-		.done();
+		.then(function() { return npmInstall(); })
+		.then(function() { return gutil.log("Finished."); });
 });
 
 gulp.task("install", function() {
-	getRegistry()
+	return getRegistry()
 		.then(function() { return getPlugins("courses"); })
 		.then(function() { return getDefaults("courses"); })
 		.then(function() { return getPlugins("menus"); })
 		.then(function() { return getPlugins("themes"); })
 		.then(function() { return getPlugins("components"); })
 		.then(function() { return getPlugins("extensions"); })
-		.done();
+		.then(function() { return gutil.log("Finished."); });
 });
 
 gulp.task("list", function() {
-	return console.log(_.pluck(getInstalledPlugins(), "name").join("\n"));
+	var plugins = _.pluck(getInstalledPlugins(), "name").sort().join("\n");
+
+	return console.log(gutil.colors.cyan(plugins) || "No plugins installed.");
 });
 
 gulp.task("uninstall", function() {
@@ -50,6 +56,7 @@ gulp.task("uninstall", function() {
 function getFramework() {
 	var deferred = Q.defer();
 
+	gutil.log("Installing framework...");
 	install(config.framework, config.dest, deferred.resolve);
 	return deferred.promise;
 }
@@ -57,19 +64,22 @@ function getFramework() {
 function getRegistry() {
 	var deferred = Q.defer();
 
-	download(getURL(config.registry))
-		.pipe(unzip())
+	request(getURL(config.registry))
+		.pipe(source())
+		.pipe(buffer())
+		.pipe(vinylAssign({ extract: true }))
+		.pipe(decompressUnzip())
 		.pipe(tap(function(file) {
-			if (path.extname(file.path) === ".json") {
-				var pluginType = path.basename(file.path, ".json");
+			if (path.extname(file.path) !== ".json") return;
 
-				registry[pluginType] = JSON.parse(file.contents);
-				registry[pluginType + "Map"] = _.indexBy(registry[pluginType], "name");
-				for (var i = 0, j = registry[pluginType].length; i < j; i++) {
-					questionsMap[pluginType].choices.push({
-						name: registry[pluginType][i].name
-					});
-				}
+			var pluginType = path.basename(file.path, ".json");
+
+			registry[pluginType] = JSON.parse(file.contents);
+			registry[pluginType + "Map"] = _.indexBy(registry[pluginType], "name");
+			for (var i = 0, j = registry[pluginType].length; i < j; i++) {
+				questionsMap[pluginType].choices.push({
+					name: registry[pluginType][i].name
+				});
 			}
 		}))
 		.on("end", deferred.resolve);
@@ -80,18 +90,24 @@ function getPlugins(pluginType) {
 	var deferred = Q.defer();
 
 	disableChoices(pluginType);
-	questionsMap[pluginType].validate = function(answer) {
-		if (answer.length < 1) _.defer(deferred.resolve);
-		return true;
-	};
+
+	if (questionsMap[pluginType].choices.length === 0) {
+		console.log("All " + pluginType + " in registry are installed.");
+		deferred.resolve();
+		return deferred.promise;
+	}
+
 	inquirer.prompt(questionsMap[pluginType], function(answer) {
-		if (!answer[pluginType]) {
-			deferred.resolve();
-			return deferred.promise;
-		}
 		var answerCount = answer[pluginType].length;
+
+		if (!answerCount) {
+			console.log(gutil.colors.cyan(" <none>"));
+			return deferred.resolve();
+		}
+
 		var waiter = new Waiter(answerCount, deferred.resolve);
 
+		gutil.log("Installing", pluginType + "...");
 		for (var i = 0; i < answerCount; i++) {
 			var choice = registry[pluginType + "Map"][answer[pluginType][i]];
 			var dest = path.join(config.dest, config.pluginDirs[pluginType], choice.name);
@@ -127,10 +143,12 @@ function getDefaults(pluginType) {
 		deferred.resolve();
 		return deferred.promise;
 	}
+
 	for (var i = 0, j = plugins.length; i < j; i++) {
 		var defaultJSON = path.join(pluginPath, plugins[i], "default.json");
 
 		if (!fs.existsSync(defaultJSON)) continue;
+
 		var defaults = JSON.parse(fs.readFileSync(defaultJSON));
 		var types = _.keys(defaults);
 
@@ -149,11 +167,13 @@ function getInstalledPlugins() {
 	var pluginTypes = _.keys(pluginDirs);
 	var installedPlugins = [];
 
+	if (path.basename(process.cwd()) === config.dest) config.dest = ".";
 	for (var i = 0, j = pluginTypes.length; i < j; i++) {
 		var pluginPath = path.join(config.dest, pluginDirs[pluginTypes[i]]);
 		var plugins = fs.existsSync(pluginPath) ? fs.readdirSync(pluginPath) : "";
 
 		if (!plugins) continue;
+
 		for (var k = 0, l = plugins.length; k < l; k++) {
 			if (!fs.statSync(path.join(pluginPath, plugins[k])).isDirectory()) continue;
 			installedPlugins.push({
@@ -170,18 +190,32 @@ function uninstallPlugins() {
 	var installedPlugins = getInstalledPlugins();
 	var installedPluginsMap = _.indexBy(installedPlugins, "name");
 
-	questionsMap.uninstall.choices = _.pluck(installedPlugins, "name");
-	inquirer.prompt(questionsMap.uninstall, function(answer) {
-		if (!answer.uninstall) return deferred.resolve();
-		var answerCount = answer.uninstall.length;
-		var waiter = new Waiter(answerCount, deferred.resolve);
+	if (installedPlugins.length === 0) {
+		console.log("No plugins installed.");
+		deferred.resolve();
+		return deferred.promise;
+	}
 
+	questionsMap.uninstall.choices = _.pluck(installedPlugins, "name").sort();
+	inquirer.prompt(questionsMap.uninstall, function(answer) {
+		var answerCount = answer.uninstall.length;
+
+		if (!answerCount) {
+			console.log(gutil.colors.cyan(" <none>"));
+			return deferred.resolve();
+		}
+
+		var waiter = new Waiter(answerCount, function() {
+			gutil.log("Finished.");
+			deferred.resolve();
+		});
+		
+		gutil.log("Uninstalling plugins...");
 		for (var i = 0; i < answerCount; i++) {
 			var choice = answer.uninstall[i];
 			var pluginDir = config.pluginDirs[installedPluginsMap[choice].type];
-			var pluginPath = path.join(config.dest, pluginDir, choice);
 
-			uninstall(choice, pluginPath, waiter.done, waiter);
+			del(path.join(config.dest, pluginDir, choice), _.bind(waiter.done, waiter));
 		}
 	});
 	return deferred.promise;
@@ -190,14 +224,16 @@ function uninstallPlugins() {
 function npmInstall() {
 	var deferred = Q.defer();
 
-	deferred.resolve();
+	gutil.log("Running", gutil.colors.cyan("npm install") + "...");
 	cwd = process.cwd();
 	process.chdir(config.dest);
 	npm.load(function(err) {
 		if (err) return deferred.reject(err);
+
 		npm.commands.install(function() {
 			if (err) return deferred.reject(err);
-			process.chdir(cwd);
+
+			process.chdir(cwd); 
 			deferred.resolve();
 		});
 	});
@@ -205,24 +241,18 @@ function npmInstall() {
 }
 
 function install(choice, dest, callback, that) {
-	download(getURL(choice))
-		.pipe(unzip())
-		.pipe(tap(function(file) {
-			file.path = file.path.substring(file.path.indexOf("/") + 1);
-		}))
+	request(getURL(choice))
+		.pipe(source())
+		.pipe(buffer())
+		.pipe(vinylAssign({ extract: true }))
+		.pipe(decompressUnzip({ strip: 1 }))
 		.pipe(gulp.dest(dest))
 		.on("end", _.bind(callback, that));
 }
 
-function uninstall(choice, path, callback, that) {
-	del(path, function(err) {
-		if (!err) console.log(choice + " uninstalled.");
-		_.bind(callback, that);
-	});
-}
-
 function getURL(choice) {
-	return "https://github.com/" + choice.repo + "/" + choice.name + "/archive/" + choice.branch + ".zip";
+	return "https://github.com/" + choice.repo + "/" + choice.name + "/archive/" +
+		choice.branch + ".zip";
 }
 
 module.exports = {

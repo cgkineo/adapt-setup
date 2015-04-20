@@ -1,34 +1,38 @@
 {
-  "name": "adapt-gulp-cli",
-  "version": "0.1.1",
-  "description": "Gulp-based command line interface for Adapt.",
+  "name": "adapt-setup",
+  "version": "0.1.2",
+  "description": "Gulp-based command line interface for installing Adapt.",
   "main": "",
   "scripts": {
     "test": ""
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/cgkineo/adapt-gulp-cli.git"
+    "url": "https://github.com/cgkineo/adapt-setup.git"
   },
   "author": "Tom Greenfield",
   "license": "GPL v3",
   "bugs": {
-    "url": "https://github.com/cgkineo/adapt-gulp-cli/issues"
+    "url": "https://github.com/cgkineo/adapt-setup/issues"
   },
   "dependencies": {
-    "commander": "^2.6.0",
+    "commander": "^2.8.0",
+    "decompress-unzip": "cgkineo/decompress-unzip",
     "del": "^1.1.1",
-    "gulp": "^3.8.10",
-    "gulp-download": "0.0.1",
+    "gulp": "^3.8.11",
     "gulp-tap": "^0.1.3",
-    "gulp-unzip": "^0.1.2",
-    "inquirer": "^0.8.0",
-    "npm": "^2.4.1",
-    "q": "^1.1.2",
-    "underscore": "^1.7.0"
+    "gulp-util": "^3.0.4",
+    "inquirer": "^0.8.2",
+    "npm": "^2.8.3",
+    "q": "^1.2.0",
+    "request": "^2.55.0",
+    "underscore": "^1.8.3",
+    "vinyl-assign": "^1.1.0",
+    "vinyl-buffer": "^1.0.0",
+    "vinyl-source-stream": "^1.1.0"
   },
   "devDependencies": {},
   "bin": {
-    "adapt-gulp": "./bin/adapt-gulp-cli"
+    "adapt-setup": "./bin/adapt-setup"
   }
 }

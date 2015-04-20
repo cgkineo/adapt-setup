@@ -9,37 +9,37 @@
 		{
 			"type": "checkbox",
 			"name": "courses",
-			"message": "Please choose course(s) to install.\n",
+			"message": "Please choose courses to install.",
 			"choices": []
 		},
 		{
 			"type": "checkbox",
 			"name": "menus",
-			"message": "Please choose menu(s) to install.\n",
+			"message": "Please choose menus to install.",
 			"choices": []
 		},
 		{
 			"type": "checkbox",
 			"name": "themes",
-			"message": "Please choose theme(s) to install.\n",
+			"message": "Please choose themes to install.",
 			"choices": []
 		},
 		{
 			"type": "checkbox",
 			"name": "components",
-			"message": "Please choose components(s) to install.\n",
+			"message": "Please choose components to install.",
 			"choices": []
 		},
 		{
 			"type": "checkbox",
 			"name": "extensions",
-			"message": "Please choose extensions(s) to install.\n",
+			"message": "Please choose extensions to install.",
 			"choices": []
 		},
 		{
 			"type": "checkbox",
 			"name": "uninstall",
-			"message": "Please choose plugin(s) to uninstall.\n",
+			"message": "Please choose plugins to uninstall.",
 			"choices": []
 		}
 	],
@@ -51,7 +51,7 @@
 		"extensions": "src/extensions"
 	},
 	"registry": {
-		"name": "adapt-gulp-registry",
+		"name": "adapt-registry",
 		"repo": "cgkineo",
 		"branch": "master"
 	}
