@@ -1,9 +1,11 @@
 {
 	"dest": "dev",
-	"framework": {
-		"name": "adapt_framework",
-		"repo": "cgkineo",
-		"branch": "master"
+	"pluginDirs": {
+		"courses": "builds",
+		"menus": "src/menu",
+		"themes": "src/theme",
+		"components": "src/components",
+		"extensions": "src/extensions"
 	},
 	"questions": [
 		{
@@ -43,13 +45,6 @@
 			"choices": []
 		}
 	],
-	"pluginDirs": {
-		"courses": "src/courses",
-		"menus": "src/menu",
-		"themes": "src/theme",
-		"components": "src/components",
-		"extensions": "src/extensions"
-	},
 	"registry": {
 		"name": "adapt-registry",
 		"repo": "cgkineo",

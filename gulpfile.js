@@ -6,7 +6,6 @@ var fs = require("fs");
 var gulp = require("gulp");
 var gutil = require("gulp-util");
 var inquirer = require("inquirer");
-var npm = require("npm");
 var path = require("path");
 var Q = require("q");
 var request = require("request");
@@ -20,15 +19,14 @@ var questionsMap = _.indexBy(config.questions, "name");
 var registry = {};
 
 gulp.task("create", function() {
-	return getFramework()
-		.then(getRegistry)
+	return getRegistry()
+		.then(getFramework)
 		.then(function() { return getPlugins("courses"); })
 		.then(function() { return getDefaults("courses"); })
 		.then(function() { return getPlugins("menus"); })
 		.then(function() { return getPlugins("themes"); })
 		.then(function() { return getPlugins("components"); })
 		.then(function() { return getPlugins("extensions"); })
-		.then(function() { return npmInstall(); })
 		.then(function() { return gutil.log("Finished."); });
 });
 
@@ -50,16 +48,9 @@ gulp.task("list", function() {
 });
 
 gulp.task("uninstall", function() {
-	return uninstallPlugins();
+	return uninstallPlugins()
+		.then(function() { return gutil.log("Finished."); });
 });
-
-function getFramework() {
-	var deferred = Q.defer();
-
-	gutil.log("Installing framework...");
-	install(config.framework, config.dest, deferred.resolve);
-	return deferred.promise;
-}
 
 function getRegistry() {
 	var deferred = Q.defer();
@@ -76,28 +67,36 @@ function getRegistry() {
 
 			registry[pluginType] = JSON.parse(file.contents);
 			registry[pluginType + "Map"] = _.indexBy(registry[pluginType], "name");
+
 			for (var i = 0, j = registry[pluginType].length; i < j; i++) {
-				questionsMap[pluginType].choices.push({
-					name: registry[pluginType][i].name
-				});
+				questionsMap[pluginType].choices.push({ name: registry[pluginType][i].name });
 			}
 		}))
 		.on("end", deferred.resolve);
+
+	return deferred.promise;
+}
+
+function getFramework() {
+	var deferred = Q.defer();
+
+	gutil.log("Installing framework...");
+	install(registry.framework, config.dest, deferred.resolve);
+
 	return deferred.promise;
 }
 
 function getPlugins(pluginType) {
 	var deferred = Q.defer();
+	var question = filterChoices(pluginType);
 
-	disableChoices(pluginType);
-
-	if (questionsMap[pluginType].choices.length === 0) {
+	if (question.choices.length === 0) {
 		console.log("All " + pluginType + " in registry are installed.");
 		deferred.resolve();
 		return deferred.promise;
 	}
 
-	inquirer.prompt(questionsMap[pluginType], function(answer) {
+	inquirer.prompt(question, function(answer) {
 		var answerCount = answer[pluginType].length;
 
 		if (!answerCount) {
@@ -108,6 +107,7 @@ function getPlugins(pluginType) {
 		var waiter = new Waiter(answerCount, deferred.resolve);
 
 		gutil.log("Installing", pluginType + "...");
+
 		for (var i = 0; i < answerCount; i++) {
 			var choice = registry[pluginType + "Map"][answer[pluginType][i]];
 			var dest = path.join(config.dest, config.pluginDirs[pluginType], choice.name);
@@ -115,23 +115,8 @@ function getPlugins(pluginType) {
 			install(choice, dest, waiter.done, waiter);
 		}
 	});
+
 	return deferred.promise;
-}
-
-function disableChoices(pluginType) {
-	var installedPlugins = _.pluck(_.where(getInstalledPlugins(), { type: pluginType }), "name");
-	// var availablePlugins = _.pluck(questionsMap[pluginType].choices, "name");
-	// var choicesToDisable = _.intersection(installedPlugins, availablePlugins);
-	// var choicesMap = _.indexBy(questionsMap[pluginType].choices, "name");
-
-	// for (var i = 0, j = choicesToDisable.length; i < j; i++) {
-	// 	choicesMap[choicesToDisable[i]].disabled = "already installed";
-	// }
-
-	// remove choices instead of disabling due to checkbox selection bug in inquirer 0.8.0
-	questionsMap[pluginType].choices = _.reject(questionsMap[pluginType].choices, function(i) {
-		return _.contains(installedPlugins, i.name);
-	});
 }
 
 function getDefaults(pluginType) {
@@ -158,16 +143,18 @@ function getDefaults(pluginType) {
 			questionsMap[type].default = _.union(questionsMap[type].default, defaults[type]);
 		}
 	}
+
 	deferred.resolve();
 	return deferred.promise;
 }
- 
+
 function getInstalledPlugins() {
 	var pluginDirs = config.pluginDirs;
 	var pluginTypes = _.keys(pluginDirs);
 	var installedPlugins = [];
 
 	if (path.basename(process.cwd()) === config.dest) config.dest = ".";
+
 	for (var i = 0, j = pluginTypes.length; i < j; i++) {
 		var pluginPath = path.join(config.dest, pluginDirs[pluginTypes[i]]);
 		var plugins = fs.existsSync(pluginPath) ? fs.readdirSync(pluginPath) : "";
@@ -176,19 +163,21 @@ function getInstalledPlugins() {
 
 		for (var k = 0, l = plugins.length; k < l; k++) {
 			if (!fs.statSync(path.join(pluginPath, plugins[k])).isDirectory()) continue;
+
 			installedPlugins.push({
 				name: plugins[k],
 				type: pluginTypes[i]
 			});
 		}
 	}
+
 	return installedPlugins;
 }
 
 function uninstallPlugins() {
 	var deferred = Q.defer();
 	var installedPlugins = getInstalledPlugins();
-	var installedPluginsMap = _.indexBy(installedPlugins, "name");
+	var question = questionsMap.uninstall;
 
 	if (installedPlugins.length === 0) {
 		console.log("No plugins installed.");
@@ -196,8 +185,8 @@ function uninstallPlugins() {
 		return deferred.promise;
 	}
 
-	questionsMap.uninstall.choices = _.pluck(installedPlugins, "name").sort();
-	inquirer.prompt(questionsMap.uninstall, function(answer) {
+	question.choices = _.pluck(installedPlugins, "name").sort();
+	inquirer.prompt(question, function(answer) {
 		var answerCount = answer.uninstall.length;
 
 		if (!answerCount) {
@@ -205,10 +194,8 @@ function uninstallPlugins() {
 			return deferred.resolve();
 		}
 
-		var waiter = new Waiter(answerCount, function() {
-			gutil.log("Finished.");
-			deferred.resolve();
-		});
+		var installedPluginsMap = _.indexBy(installedPlugins, "name");
+		var waiter = new Waiter(answerCount, deferred.resolve);
 		
 		gutil.log("Uninstalling plugins...");
 		for (var i = 0; i < answerCount; i++) {
@@ -218,26 +205,24 @@ function uninstallPlugins() {
 			del(path.join(config.dest, pluginDir, choice), _.bind(waiter.done, waiter));
 		}
 	});
+
 	return deferred.promise;
 }
 
-function npmInstall() {
-	var deferred = Q.defer();
+function getURL(choice) {
+	return "https://github.com/" + choice.repo + "/" + choice.name + "/archive/" +
+		choice.branch + ".zip";
+}
 
-	gutil.log("Running", gutil.colors.cyan("npm install") + "...");
-	cwd = process.cwd();
-	process.chdir(config.dest);
-	npm.load(function(err) {
-		if (err) return deferred.reject(err);
+function filterChoices(pluginType) {
+	var installedPlugins = _.pluck(_.where(getInstalledPlugins(), { type: pluginType }), "name");
+	var question = questionsMap[pluginType];
 
-		npm.commands.install(function() {
-			if (err) return deferred.reject(err);
-
-			process.chdir(cwd); 
-			deferred.resolve();
-		});
+	question.choices = _.reject(question.choices, function(i) {
+		return _.contains(installedPlugins, i.name);
 	});
-	return deferred.promise;
+
+	return question;
 }
 
 function install(choice, dest, callback, that) {
@@ -248,11 +233,6 @@ function install(choice, dest, callback, that) {
 		.pipe(decompressUnzip({ strip: 1 }))
 		.pipe(gulp.dest(dest))
 		.on("end", _.bind(callback, that));
-}
-
-function getURL(choice) {
-	return "https://github.com/" + choice.repo + "/" + choice.name + "/archive/" +
-		choice.branch + ".zip";
 }
 
 module.exports = {
