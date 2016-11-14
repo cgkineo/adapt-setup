@@ -8,9 +8,11 @@ program
 	.option("install")
 	.option("list")
 	.option("uninstall")
+	.option("update")
 	.parse(process.argv);
 
 if (program.create) gulp.create();
 if (program.install) gulp.install();
 if (program.list) gulp.list();
 if (program.uninstall) gulp.uninstall();
+if (program.update) gulp.update();

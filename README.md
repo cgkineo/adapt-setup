@@ -4,7 +4,7 @@ Gulp-based command line interface for installing Adapt.
 
 ## Installation
 
-Note: requires [Node.js](http://nodejs.org) and [Git](http://git-scm.com) to be installed.
+Note: requires [Node.js](http://nodejs.org) to be installed.
 
 From the command line, run:
 ```
@@ -30,7 +30,13 @@ adapt-setup create
 ```
 adapt-setup list
 ```
-* Lists all plugins currently installed
+* Lists the framework and plugins currently installed
+
+### Update
+```
+adapt-setup update
+```
+* Allows you to update the framework and plugins if available
 
 ### Uninstall
 ```

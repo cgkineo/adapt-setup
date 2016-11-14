@@ -1,33 +1,33 @@
 {
-	"name": "adapt-setup",
-	"version": "0.2.0",
-	"description": "Gulp-based command line interface for installing Adapt.",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/cgkineo/adapt-setup.git"
-	},
-	"author": "Tom Greenfield",
-	"license": "GPL-3.0",
-	"bugs": {
-		"url": "https://github.com/cgkineo/adapt-setup/issues"
-	},
-	"homepage": "https://github.com/cgkineo/adapt-setup",
-	"dependencies": {
-		"commander": "^2.8.1",
-		"decompress-unzip": "cgkineo/decompress-unzip",
-		"del": "^1.2.0",
-		"gulp": "^3.9.0",
-		"gulp-tap": "^0.1.3",
-		"gulp-util": "^3.0.6",
-		"inquirer": "^0.8.5",
-		"q": "^1.4.1",
-		"request": "^2.59.0",
-		"underscore": "^1.8.3",
-		"vinyl-assign": "^1.2.0",
-		"vinyl-buffer": "^1.0.0",
-		"vinyl-source-stream": "^1.1.0"
-	},
-	"bin": {
-		"adapt-setup": "./bin/adapt-setup"
-	}
+  "name": "adapt-setup",
+  "version": "0.3.0",
+  "description": "Gulp-based command line interface for installing Adapt",
+  "main": "gulpfile.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cgkineo/adapt-setup.git"
+  },
+  "author": "Tom Greenfield",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/cgkineo/adapt-setup/issues"
+  },
+  "homepage": "https://github.com/cgkineo/adapt-setup#readme",
+  "dependencies": {
+    "commander": "^2.9.0",
+    "del": "^2.2.2",
+    "gulp": "^3.9.1",
+    "gulp-decompress": "^2.0.1",
+    "gulp-tap": "^0.1.3",
+    "gulp-util": "^3.0.7",
+    "inquirer": "^1.2.2",
+    "q": "^1.4.1",
+    "request": "^2.75.0",
+    "underscore": "^1.8.3",
+    "vinyl-buffer": "^1.0.0",
+    "vinyl-source-stream": "^1.1.0"
+  },
+  "bin": {
+    "adapt-setup": "./bin/adapt-setup"
+  }
 }

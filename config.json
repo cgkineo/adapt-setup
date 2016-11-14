@@ -11,38 +11,51 @@
 		{
 			"type": "checkbox",
 			"name": "courses",
-			"message": "Please choose courses to install.",
-			"choices": []
+			"message": "Please choose courses to install."
 		},
 		{
 			"type": "checkbox",
 			"name": "menus",
-			"message": "Please choose menus to install.",
-			"choices": []
+			"message": "Please choose menus to install."
 		},
 		{
 			"type": "checkbox",
 			"name": "themes",
-			"message": "Please choose themes to install.",
-			"choices": []
+			"message": "Please choose themes to install."
 		},
 		{
 			"type": "checkbox",
 			"name": "components",
-			"message": "Please choose components to install.",
-			"choices": []
+			"message": "Please choose components to install."
 		},
 		{
 			"type": "checkbox",
 			"name": "extensions",
-			"message": "Please choose extensions to install.",
-			"choices": []
+			"message": "Please choose extensions to install."
+		},
+		{
+			"type": "checkbox",
+			"name": "plugins",
+			"message": "Please choose additional plugins to install."
 		},
 		{
 			"type": "checkbox",
 			"name": "uninstall",
-			"message": "Please choose plugins to uninstall.",
-			"choices": []
+			"message": "Please choose plugins to uninstall."
+		},
+		{
+			"type": "list",
+			"name": "framework",
+			"message": "Would you like to update the framework?",
+			"choices": [
+				"Yes",
+				"No"
+			]
+		},
+		{
+			"type": "checkbox",
+			"name": "update",
+			"message": "Please choose plugins to update."
 		}
 	],
 	"registry": {
