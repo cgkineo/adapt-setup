@@ -9,6 +9,7 @@ var inquirer = require("inquirer");
 var path = require("path");
 var Q = require("q");
 var request = require("request");
+var semver = require("semver");
 var source = require("vinyl-source-stream");
 var tap = require("gulp-tap");
 var Waiter = require("./Waiter");
@@ -370,7 +371,7 @@ function checkFrameworkVersion(callback) {
 
 	request(URL, function(error, response, body) {
 		var isUpdateAvailable = response.statusCode === 200 &&
-			JSON.parse(body).version > getInstalledFramework().version;
+			semver.gt(JSON.parse(body).version, installedFramework.version);
 
 		return callback(isUpdateAvailable);
 	});
@@ -393,7 +394,7 @@ function getUpdateChoices(callback) {
 
 		request(URL, function(error, response, body) {
 			if (response.statusCode !== 200 ||
-				JSON.parse(body).version <= installedPlugin.version) {
+				semver.lte(JSON.parse(body).version, installedPlugin.version)) {
 				return waiter.done();
 			}
 
