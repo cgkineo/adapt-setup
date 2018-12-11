@@ -53,7 +53,7 @@ function downloadFramework() {
 }
 
 function downloadCourse() {
-	return download(config.course, "builds", { extract: true, strip: 1 });
+	return download(config.course, "builds/p101", { extract: true, strip: 1 });
 }
 
 async function getPluginList() {
@@ -65,7 +65,8 @@ async function getPluginList() {
 async function getPluginChoices(answers, input) {
 	const getPluginsByUser = user => {
 		let list = plugins.filter(plugin => {
-			return plugin.url.split("/")[3] === user && plugin.name.includes(input);
+			return plugin.url.split("/")[3] === user &&
+				plugin.name.toLowerCase().includes(input.toLowerCase());
 		});
 
 		return list.length ? [].concat(getSeparator(user), list.reverse()) : list;
@@ -76,7 +77,7 @@ async function getPluginChoices(answers, input) {
 			const user = plugin.user = plugin.url.split("/")[3];
 
 			return user !== "adaptlearning" && user !== "cgkineo" &&
-				plugin.name.includes(input);
+				plugin.name.toLowerCase().includes(input.toLowerCase());
 		});
 
 		if (!list.length) return list;
