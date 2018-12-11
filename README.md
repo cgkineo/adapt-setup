@@ -1,45 +1,23 @@
 # adapt-setup
 
-Gulp-based command line interface for installing Adapt.
+Command line helper for building an Adapt p101.
 
 ## Installation
 
 Note: requires [Node.js](http://nodejs.org) to be installed.
 
 From the command line, run:
-```
+
+```console
 npm install -g adapt-setup
 ```
 
-## Commands
+## Usage
 
-### Create
+```console
+adapt-setup
 ```
-adapt-setup create
-```
-* Installs the Adapt framework
-* Allows you to select which plugins to install (i.e. courses, menus, themes, components and extensions)
 
-### Install
-```
- adapt-setup install
-```
-* Allows you to select additional plugins to install
-
-### List
-```
-adapt-setup list
-```
-* Lists the framework and plugins currently installed
-
-### Update
-```
-adapt-setup update
-```
-* Allows you to update the framework and plugins if available
-
-### Uninstall
-```
-adapt-setup uninstall
-```
-* Allows you to select existing plugins to delete
+* Downloads the Adapt framework and a blank p101 course.
+* Populates `adapt.json` with the plugins you select.
+* To complete installation, use the official [Adapt CLI](https://github.com/adaptlearning/adapt-cli) and [Rub](https://github.com/cgkineo/rub-cli).
