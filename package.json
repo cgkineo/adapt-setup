@@ -1,7 +1,8 @@
 {
   "name": "adapt-setup",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "Command line helper for building an Adapt p101",
+  "type": "module",
   "main": "index.js",
   "repository": {
     "type": "git",
@@ -13,12 +14,12 @@
   },
   "homepage": "https://github.com/cgkineo/adapt-setup#readme",
   "dependencies": {
-    "download": "^7.1.0",
-    "inquirer": "^6.2.1",
+    "download": "^8.0.0",
+    "inquirer": "^8.1.2",
     "inquirer-checkbox-plus-prompt": "^1.0.1",
-    "node-fetch": "^2.3.0"
+    "node-fetch": "^2.6.1"
   },
   "bin": {
-    "adapt-setup": "./bin/adapt-setup"
+    "adapt-setup": "./bin/adapt-setup.js"
   }
 }

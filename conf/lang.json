@@ -1,0 +1,23 @@
+{
+	"prompts": {
+		"confirm": {
+			"message": "The framework will be downloaded to your current directory. Do you wish to continue?",
+			"choices": [
+				{
+					"name": "Yes",
+					"value": true
+				},
+				{
+					"name": "No",
+					"value": false
+				}
+			]
+		},
+		"plugins": {
+			"message": "Press <space> to select plugins or type to search"
+		}
+	},
+	"download": "Downloading...",
+	"other": "other",
+	"finish": "Run 'adapt install' to continue installation"
+}

@@ -1,5 +1,0 @@
-{
-	"framework": "https://github.com/adaptlearning/adapt_framework/archive/master.zip",
-	"course": "https://github.com/cgkineo/p101/archive/master.zip",
-	"registry": "http://adapt-bower-repository.herokuapp.com/packages"
-}
