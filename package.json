@@ -1,6 +1,6 @@
 {
   "name": "adapt-setup",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Command line helper for building an Adapt p101",
   "type": "module",
   "main": "index.js",
@@ -19,7 +19,5 @@
     "inquirer-checkbox-plus-prompt": "^1.0.1",
     "node-fetch": "^2.6.1"
   },
-  "bin": {
-    "adapt-setup": "./bin/adapt-setup.js"
-  }
+  "bin": "./bin/adapt-setup.js"
 }
