@@ -13,6 +13,19 @@
 				}
 			]
 		},
+		"courseSource": {
+			"message": "Choose the source of the course content:",
+			"choices": [
+				{
+					"name": "CGKineo",
+					"value": "cgkineocourse"
+				},
+				{
+					"name": "Adapt Framework",
+					"value": "course"
+				}
+			]
+		},
 		"plugins": {
 			"message": "Press <space> to select plugins or type to search"
 		}
