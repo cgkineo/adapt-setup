@@ -18,6 +18,9 @@
     "inquirer-checkbox-plus-prompt": "^1.0.1",
     "node-fetch": "^2.6.1"
   },
+  "engines": {
+    "node": ">=16.14.0"
+  },
   "bin": "./bin/adapt-setup.js",
   "license": "GPL-3.0",
   "private": false,
