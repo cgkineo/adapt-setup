@@ -1,6 +1,6 @@
 {
   "name": "adapt-setup",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Command line helper for building an Adapt p101",
   "type": "module",
   "main": "index.js",
