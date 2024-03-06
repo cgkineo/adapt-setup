@@ -1,6 +1,6 @@
 {
   "name": "adapt-setup",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Command line helper for building an Adapt p101",
   "type": "module",
   "main": "index.js",
@@ -17,6 +17,9 @@
     "inquirer": "^8.1.2",
     "inquirer-checkbox-plus-prompt": "^1.0.1",
     "node-fetch": "^2.6.1"
+  },
+  "engines": {
+    "node": ">=16.14.0"
   },
   "bin": "./bin/adapt-setup.js",
   "license": "GPL-3.0",
